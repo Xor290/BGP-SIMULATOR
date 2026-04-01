@@ -1,6 +1,10 @@
 package db
 
-import "bgp-manager/models"
+import (
+	"bgp-manager/models"
+
+	"gorm.io/gorm"
+)
 
 func (db *Database) CreatePeer(peer *models.Peer) error {
 	return db.DB.Create(peer).Error
@@ -22,5 +26,14 @@ func (db *Database) GetAllPeers() ([]models.Peer, error) {
 
 func (db *Database) GetPeerById(peerID string) (*models.Peer, error) {
 	var peer models.Peer
-	return &peer, db.DB.First(&peer, peerID).Error
+	return &peer, db.DB.Preload("LocalAS").First(&peer, peerID).Error
+}
+
+func (db *Database) GetPeersByASID(asID uint) ([]models.Peer, error) {
+	var peers []models.Peer
+	return peers, db.DB.Where("local_as_id = ?", asID).Find(&peers).Error
+}
+
+func (db *Database) DeletePeers() error {
+	return db.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Peer{}).Error
 }
