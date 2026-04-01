@@ -93,3 +93,39 @@ func GetSessions(c *gin.Context) {
 func SyncSessions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "sync déclenché"})
 }
+
+func CreatePrefixSinceAS(c *gin.Context) {
+	var req models.CreatePrefixSinceAS
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	database := c.MustGet("database").(*db.Database)
+
+	as, err := database.GetASByASN(req.ASN)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "AS introuvable"})
+		return
+	}
+
+	prefix := models.PrefixSinceAS{
+		Prefix:    req.Prefix,
+		ASID:      as.ID,
+		NextHop:   req.NextHop,
+		LocalPref: req.LocalPref,
+		Active:    true,
+	}
+
+	if err := database.CreatePrefixAS(&prefix); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := ApplyASConfig(database, as.ID, &as); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, prefix)
+}

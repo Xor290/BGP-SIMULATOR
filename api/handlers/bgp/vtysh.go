@@ -8,8 +8,8 @@ import (
 	"os/exec"
 )
 
-func RunAnsiblePlaybook(localAS *models.AutonomousSystem, peers []models.Peer) error {
-	varsFile, err := tmpl.GenerateVarsFile(localAS, peers)
+func RunAnsiblePlaybook(localAS *models.AutonomousSystem, peers []models.Peer, prefixes []models.PrefixSinceAS) error {
+	varsFile, err := tmpl.GenerateVarsFile(localAS, peers, prefixes)
 	if err != nil {
 		return err
 	}

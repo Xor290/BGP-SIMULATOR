@@ -6,11 +6,19 @@ import (
 )
 
 func ApplyPeerConfig(database *db.Database, peer *models.Peer) error {
-	peers, err := database.GetPeersByASID(peer.LocalASID)
+	return ApplyASConfig(database, peer.LocalASID, &peer.LocalAS)
+}
+
+func ApplyASConfig(database *db.Database, asID uint, localAS *models.AutonomousSystem) error {
+	peers, err := database.GetPeersByASID(asID)
 	if err != nil {
 		return err
 	}
-	return RunAnsiblePlaybook(&peer.LocalAS, peers)
+	prefixes, err := database.GetPrefixesByASID(asID)
+	if err != nil {
+		return err
+	}
+	return RunAnsiblePlaybook(localAS, peers, prefixes)
 }
 
 func SyncSessionStates(database *db.Database) error {
