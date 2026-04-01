@@ -42,6 +42,7 @@ func (d *Database) Migrate() {
 		&models.Peer{},
 		&models.BGPSession{},
 		&models.BGPRoute{},
+		&models.PrefixSinceAS{},
 	)
 	if err != nil {
 		log.Fatalf("❌ Migration échouée : %v", err)

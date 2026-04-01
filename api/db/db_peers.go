@@ -31,9 +31,18 @@ func (db *Database) GetPeerById(peerID string) (*models.Peer, error) {
 
 func (db *Database) GetPeersByASID(asID uint) ([]models.Peer, error) {
 	var peers []models.Peer
-	return peers, db.DB.Where("local_as_id = ?", asID).Find(&peers).Error
+	return peers, db.DB.Preload("LocalAS").Where("local_as_id = ?", asID).Find(&peers).Error
 }
 
 func (db *Database) DeletePeers() error {
 	return db.DB.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Peer{}).Error
+}
+
+func (db *Database) CreatePrefixAS(prefix *models.PrefixSinceAS) error {
+	return db.DB.Create(prefix).Error
+}
+
+func (db *Database) GetPrefixesByASID(asID uint) ([]models.PrefixSinceAS, error) {
+	var prefixes []models.PrefixSinceAS
+	return prefixes, db.DB.Where("as_id = ? AND active = ?", asID, true).Find(&prefixes).Error
 }
