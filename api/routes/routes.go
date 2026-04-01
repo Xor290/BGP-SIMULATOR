@@ -38,6 +38,12 @@ func SetupRoutes(r *gin.Engine, database *db.Database) {
 		peers.POST("/sync", bgp.SyncSessions)
 	}
 
+	bgpGroup := r.Group("/api/v1/bgp")
+	bgpGroup.Use(middleware.ClientMiddleware())
+	{
+		bgpGroup.POST("/create/prefix", bgp.CreatePrefixSinceAS)
+
+	}
 	asGroup := r.Group("/api/v1/as")
 	asGroup.Use(middleware.ClientMiddleware())
 	{
