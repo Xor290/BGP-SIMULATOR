@@ -37,6 +37,7 @@ func Connect() *Database {
 
 func (d *Database) Migrate() {
 	err := d.AutoMigrate(
+		&models.Client{},
 		&models.AutonomousSystem{},
 		&models.Peer{},
 		&models.BGPSession{},

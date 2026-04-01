@@ -9,12 +9,6 @@ import (
 )
 
 func GetPeers(c *gin.Context) {
-	var req models.PeerResponse
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	database := c.MustGet("database").(*db.Database)
 	peers, err := database.GetAllPeers()
 	if err != nil {
@@ -58,6 +52,11 @@ func CreatePeer(c *gin.Context) {
 
 	database := c.MustGet("database").(*db.Database)
 	if err := database.CreatePeer(&peer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := database.DB.Preload("LocalAS").First(&peer, peer.ID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

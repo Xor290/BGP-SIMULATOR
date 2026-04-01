@@ -2,6 +2,7 @@ package routes
 
 import (
 	"bgp-manager/db"
+	asHandler "bgp-manager/handlers/as"
 	"bgp-manager/handlers/bgp"
 	"bgp-manager/handlers/clients"
 	"bgp-manager/middleware"
@@ -24,6 +25,17 @@ func SetupRoutes(r *gin.Engine, database *db.Database) {
 	peers := r.Group("/api/v1/peers")
 	peers.Use(middleware.ClientMiddleware())
 	{
-		peers.GET("/create-peer", bgp.CreatePeer)
+		peers.GET("/all", bgp.GetPeers)
+		peers.POST("/create", bgp.CreatePeer)
+		peers.GET("/:peerID", bgp.GetPeerWithId)
+		peers.DELETE("/:peerID", bgp.DeletePeer)
+		peers.GET("/:peerID/sessions", bgp.GetSessions)
+		peers.POST("/sync", bgp.SyncSessions)
+	}
+
+	asGroup := r.Group("/api/v1/as")
+	asGroup.Use(middleware.ClientMiddleware())
+	{
+		asGroup.POST("/", asHandler.CreateAutonomousSystem)
 	}
 }
