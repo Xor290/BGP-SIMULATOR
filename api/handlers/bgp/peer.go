@@ -9,7 +9,30 @@ import (
 )
 
 func GetPeers(c *gin.Context) {
+	var req models.PeerResponse
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
+	database := c.MustGet("database").(*db.Database)
+	peers, err := database.GetAllPeers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, peers)
+}
+
+func GetPeerWithId(c *gin.Context) {
+	peerID := c.Param("peerID")
+	database := c.MustGet("database").(*db.Database)
+	peer, err := database.GetPeerById(peerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, peer)
 }
 
 func CreatePeer(c *gin.Context) {
@@ -38,13 +61,34 @@ func CreatePeer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	if err := ApplyPeerConfig(database, &peer); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, peer)
 }
 
 func DeletePeer(c *gin.Context) {
+	peerID := c.Param("peerID")
+	database := c.MustGet("database").(*db.Database)
+	if err := database.DeletePeerById(peerID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "peer deleted"})
 }
 
 func GetSessions(c *gin.Context) {
+	peerID := c.Param("peerID")
+	database := c.MustGet("database").(*db.Database)
+	sessions, err := database.GetSessions(peerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, sessions)
 }
 
 func SyncSessions(c *gin.Context) {

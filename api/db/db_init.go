@@ -12,13 +12,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// Database est le type central du package db. Toutes les opérations sont
-// définies comme méthodes sur ce type pour éviter de passer *gorm.DB partout.
 type Database struct {
 	*gorm.DB
 }
 
-// Connect ouvre la connexion PostgreSQL et retourne un *Database.
 func Connect() *Database {
 	dsn := buildDSN()
 
@@ -38,7 +35,6 @@ func Connect() *Database {
 	return &Database{gdb}
 }
 
-// Migrate applique les migrations automatiques pour tous les modèles.
 func (d *Database) Migrate() {
 	err := d.AutoMigrate(
 		&models.AutonomousSystem{},
@@ -52,8 +48,6 @@ func (d *Database) Migrate() {
 	log.Println("✅ Migrations appliquées")
 }
 
-
-// buildDSN construit la DSN depuis les variables d'environnement.
 func buildDSN() string {
 	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")

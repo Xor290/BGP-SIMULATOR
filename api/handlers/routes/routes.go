@@ -2,7 +2,9 @@ package routes
 
 import (
 	"bgp-manager/db"
+	"bgp-manager/handlers/bgp"
 	"bgp-manager/handlers/clients"
+	"bgp-manager/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,4 +21,9 @@ func SetupRoutes(r *gin.Engine, database *db.Database) {
 		authClient.POST("/login", clients.LoginClient)
 	}
 
+	peers := r.Group("/api/v1/peers")
+	peers.Use(middleware.ClientMiddleware())
+	{
+		peers.GET("/create-peer", bgp.CreatePeer)
+	}
 }
