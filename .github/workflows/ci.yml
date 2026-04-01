@@ -61,6 +61,11 @@ jobs:
                   chmod +x test_routes.sh
                   ./test_routes.sh
 
+            - name: Run functional tests
+              run: |
+                  chmod +x test_bgp.sh
+                  ./test_bgp.sh
+
             - name: Show logs on failure
               if: failure()
               run: docker compose logs
