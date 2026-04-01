@@ -15,7 +15,12 @@ func SetupRoutes(r *gin.Engine, database *db.Database) {
 		c.Set("database", database)
 		c.Next()
 	})
-
+	health := r.Group("/api/v1/health")
+	{
+		health.GET("", func(c *gin.Context) {
+			c.JSON(200, gin.H{"status": "ok"})
+		})
+	}
 	authClient := r.Group("/api/v1/auth")
 	{
 		authClient.POST("/register", clients.RegisterClient)
