@@ -1,0 +1,35 @@
+frr version 9.1
+frr defaults traditional
+hostname {{ hostname }}
+log syslog informational
+no ipv6 forwarding
+service integrated-vtysh-config
+
+router bgp {{ local_asn }}
+ bgp router-id {{ router_id }}
+ no bgp ebgp-requires-policy
+{% for peer in peers %}
+ neighbor {{ peer.peer_ip }} remote-as {{ peer.remote_asn }}
+{% if peer.description is defined and peer.description %}
+ neighbor {{ peer.peer_ip }} description {{ peer.description }}
+{% endif %}
+{% if peer.password is defined and peer.password %}
+ neighbor {{ peer.peer_ip }} password {{ peer.password }}
+{% endif %}
+{% if not peer.enabled %}
+ neighbor {{ peer.peer_ip }} shutdown
+{% endif %}
+{% endfor %}
+{% if prefixes %}
+ !
+ address-family ipv4 unicast
+{% for prefix in prefixes %}
+  network {{ prefix.prefix }}
+{% endfor %}
+{% for peer in peers %}
+  neighbor {{ peer.peer_ip }} activate
+{% endfor %}
+ exit-address-family
+{% endif %}
+
+line vty

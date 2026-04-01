@@ -1,0 +1,17 @@
+---
+- name: Apply BGP peer config on FRR container
+  hosts: "frr-as{{ local_asn }}"
+  gather_facts: false
+
+  tasks:
+    - name: Deploy frr.conf from template
+      ansible.builtin.template:
+        src: templates/frr_bgp.j2
+        dest: /etc/frr/frr.conf
+        owner: frr
+        group: frr
+        mode: "0640"
+
+    - name: Reload FRR config
+      ansible.builtin.command: vtysh -f /etc/frr/frr.conf
+      changed_when: true
