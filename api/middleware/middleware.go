@@ -14,7 +14,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-
 func clientSecret() []byte { return []byte(os.Getenv("USER_JWT_SECRET")) }
 
 // validateClientToken valide un token client
@@ -82,8 +81,6 @@ func ClientMiddleware() gin.HandlerFunc {
 		c.Set("client_id", claims.ClientID)
 		c.Set("username", claims.Username)
 		c.Set("role", claims.Role)
-
-		log.Printf("✅ [CLIENT-MWARE] Client %s (ID=%d) authentifié", claims.Username, claims.ClientID)
 
 		c.Next()
 	}

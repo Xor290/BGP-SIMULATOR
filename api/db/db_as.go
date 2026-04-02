@@ -19,3 +19,8 @@ func (db *Database) GetASByASN(asn uint32) (models.AutonomousSystem, error) {
 	err := db.DB.Where("asn = ?", asn).First(&as).Error
 	return as, err
 }
+
+func (db *Database) GetPrefixesByASID(asID uint) ([]models.PrefixSinceAS, error) {
+	var prefixes []models.PrefixSinceAS
+	return prefixes, db.DB.Where("as_id = ? AND active = ?", asID, true).Find(&prefixes).Error
+}
